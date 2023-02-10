@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
+:root {
+  --font-family: 'Manrope', sans-serif;
+
+  /* --gradient-text: linear-gradient(89.97deg, #AE67FA 1.84%, #F49867 102.67%);
+  --gradient-bar: linear-gradient(103.22deg, #AE67FA -13.86%, #F49867 99.55%); */
+  --gradient-text: linear-gradient(89.97deg, #67fae4 1.84%, #08df89 102.67%);
+  --gradient-bar: linear-gradient(103.22deg, #67fae4 -13.86%, #08df89 99.55%);
+  scrollbar-color: dark;
+  --color-bg: #040C18;
+  --color-footer : #031B34;
+  --color-blog: #042c54;
+  --color-text: #81AFDD;
+  --color-subtext: #FF8A71;
+}
+
+
+::-webkit-scrollbar {
+  width: 1em;
+}
+
+/* ::-webkit-scrollbar-track {
+  background: hsla(168, 100%, 43%, 1);
+  border-radius: 100vw;
+} 
+
+::-webkit-scrollbar-thumb {
+  background: rgb(0, 197, 219);
+  border-radius: 100vw;
+}  */
+ 
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(6, 139, 154);
+} 
+
