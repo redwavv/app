@@ -115,7 +115,7 @@ background:#000000;
 
 :root {
   --primary-color: rgba(24, 39, 51, 0.75);
-  --overlay-color: rgba(159, 33, 194, 0.85);  
+  --overlay-color: rgba(194, 33, 76, 0.192);  
   /* --overlay-color: rgba(24, 39, 51 , 0.85); */
   --menu-speed: 0.75s;
 

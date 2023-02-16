@@ -12,5 +12,5 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./ssl/certs:/etc/ssl/certs/
       - ./ssl/private:/etc/ssl/private/
-      - ./dist:/react/build/
+      - ./build:/react/build/
 

@@ -1,21 +1,16 @@
 import React from "react";
 
-
 import Scene from "./pages/Scene";
-import HOMEHT from "./pages/HOMEHT"
+import HOMEHT from "./pages/HOMEHT";
 
-import "./App.css";
-
-
-
+// import "./App.css";
 
 const App = () => {
   return (
     <div className="App">
-    <HOMEHT />
-    <Scene />
+      <HOMEHT />
+      <Scene />
     </div>
   );
-}
+};
 export default App;
-

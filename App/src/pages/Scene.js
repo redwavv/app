@@ -1,8 +1,11 @@
 import "./Scene.css";
-import React, { Component } from 'react'
+import React, { Component } from "react";
 import * as THREE from "three";
-import ReactDOM from 'react-dom'
-
+import ReactDOM from "react-dom";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { Water } from "three/addons/objects/Water.js";
+import { Sky } from "three/addons/objects/Sky.js";
+import waterNormalsImage from "../assets/waternormals.jpg";
 
 class Scene extends Component {
   render() {
@@ -10,103 +13,137 @@ class Scene extends Component {
       <div
         style={{
           width: "100vw",
-          height: "100vh"
+          height: "100vh",
         }}
-        ref={el => (this.container = el)}
+        ref={(el) => (this.container = el)}
       />
     );
   }
 
-
-
-componentDidMount() {
-    //Declare three.js variables
-    var camera, scene, renderer, stars=[];
-	 
-    //assign three.js objects to each variable
-    function init(){
-       
-      //camera
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-      camera.position.z = 5;	 
-  
-      //scene
-      scene = new THREE.Scene();
-       
-      //renderer
-      renderer = new THREE.WebGLRenderer();
-      //set the size of the renderer
-      renderer.setSize( window.innerWidth, window.innerHeight );
-       
-      //add the renderer to the html document body
-      document.body.appendChild( renderer.domElement );
-    }
-  
-  
-    function addSphere(){
-  
-          // The loop will move from z position of -1000 to z position 1000, adding a random particle at each position. 
-          for ( var z= -1000; z < 1000; z+=20 ) {
-      
-            // Make a sphere (exactly the same as before). 
-            var geometry   = new THREE.SphereGeometry(0.5, 32, 32)
-            var material = new THREE.MeshBasicMaterial( {color: 0xe23bff} );
-            var sphere = new THREE.Mesh(geometry, material)
-      
-            // This time we give the sphere random x and y positions between -500 and 500
-            sphere.position.x = Math.random() * 1000 - 500;
-            sphere.position.y = Math.random() * 1000 - 500;
-      
-            // Then set the z position to where it is in the loop (distance of camera)
-            sphere.position.z = z;
-      
-            // scale it up a bit
-            sphere.scale.x = sphere.scale.y = 2;
-      
-            //add the sphere to the scene
-            scene.add( sphere );
-      
-            //finally push it to the stars array 
-            stars.push(sphere); 
-          }
-    }
-  
-    function animateStars() { 
-          
-      // loop through each star
-      for(var i=0; i<stars.length; i++) {
-        
-        const star = stars[i]; 
-          
-        // and move it forward dependent on the mouseY position. 
-        star.position.z +=  i/10;
-          
-        // if the particle is too close move it to the back
-        if(star.position.z>1000) star.position.z-=2000; 
-        
-      }
-    
-    }
-  
-    function render() {
-      //get the frame
-      requestAnimationFrame( render );
-  
-      //render the scene
-      renderer.render( scene, camera );
-        animateStars();
-  
-    }
-
+  componentDidMount() {
+    let camera, scene, renderer;
+    let controls, water, sun;
     init();
-    
-    addSphere();
-    render();
+    animate();
+
+    function init() {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+      });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      document.body.appendChild(renderer.domElement);
+
+      //
+
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(
+        55,
+        window.innerWidth / window.innerHeight,
+        1,
+        20000
+      );
+      camera.position.set(30, 30, 100);
+
+      //
+
+      sun = new THREE.Vector3();
+
+      // Water
+
+      const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+
+      water = new Water(waterGeometry, {
+        textureWidth: 512,
+        textureHeight: 512,
+        waterNormals: new THREE.TextureLoader().load(
+          waterNormalsImage,
+          function (texture) {
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          }
+        ),
+        sunDirection: new THREE.Vector3(),
+        sunColor: 0xffffff,
+        waterColor: 0x001e0f,
+        distortionScale: 3.7,
+        fog: scene.fog !== undefined,
+      });
+
+      water.rotation.x = -Math.PI / 2;
+
+      scene.add(water);
+
+      // Skybox
+
+      const sky = new Sky();
+      sky.scale.setScalar(10000);
+      scene.add(sky);
+
+      const skyUniforms = sky.material.uniforms;
+
+      skyUniforms["turbidity"].value = 10;
+      skyUniforms["rayleigh"].value = 2;
+      skyUniforms["mieCoefficient"].value = 0.005;
+      skyUniforms["mieDirectionalG"].value = 0.8;
+
+      const parameters = {
+        elevation: 2,
+        azimuth: 180,
+      };
+
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      let renderTarget;
+
+      function updateSun() {
+        const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
+        const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+
+        sun.setFromSphericalCoords(1, phi, theta);
+
+        sky.material.uniforms["sunPosition"].value.copy(sun);
+        water.material.uniforms["sunDirection"].value.copy(sun).normalize();
+
+        if (renderTarget !== undefined) renderTarget.dispose();
+
+        renderTarget = pmremGenerator.fromScene(sky);
+
+        scene.environment = renderTarget.texture;
+      }
+
+      updateSun();
+      //
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.maxPolarAngle = Math.PI * 0.495;
+      controls.target.set(0, 10, 0);
+      controls.minDistance = 40.0;
+      controls.maxDistance = 200.0;
+      controls.update();
+
+      window.addEventListener("resize", onWindowResize);
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      render();
+    }
+
+    function render() {
+      water.material.uniforms["time"].value += 1.0 / 60.0;
+
+      renderer.render(scene, camera);
+    }
     this.container.appendChild(renderer.domElement);
+  }
 }
-
-}
-ReactDOM.render(<Scene />, document.getElementById('root')) 
-export default Scene;   
-
-
+ReactDOM.render(<Scene />, document.getElementById("root"));
+export default Scene;
