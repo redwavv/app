@@ -1,5 +1,5 @@
 import "./HOMEHT.css";
-import image1 from "../assets/redwav-worded-logo-site-1.png";
+import image1 from "../assets/redwav-worded-logo-site-2.png";
 import image2 from "../assets/redwav-main-logo-site-1.png";
 function HOMEHT() {
   return (
