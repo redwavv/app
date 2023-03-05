@@ -1,6 +1,6 @@
 import "./HOMEHT.css";
-import image1 from "../assets/redwav-worded-logo-site.png";
-import image2 from "../assets/redwav-main-logo-site.png";
+import image1 from "../assets/redwav-worded-logo-site-1.png";
+import image2 from "../assets/redwav-main-logo-site-1.png";
 function HOMEHT() {
   return (
     <>
@@ -61,6 +61,11 @@ function HOMEHT() {
             {" "}
             A Metaverse Experience
           </p>
+        </div>
+        <div>
+          <button className="enter-button" type="button">
+            Enter
+          </button>
         </div>
       </div>
     </>
