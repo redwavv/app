@@ -6,7 +6,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Water } from "three/addons/objects/Water.js";
 import { Sky } from "three/addons/objects/Sky.js";
 import waterNormalsImage from "../assets/waternormals.jpg";
-
+import underwater from "../assets/underwater4.jpg";
 class Scene extends Component {
   render() {
     return (
@@ -40,15 +40,22 @@ class Scene extends Component {
       scene = new THREE.Scene();
 
       camera = new THREE.PerspectiveCamera(
-        55,
+        75,
         window.innerWidth / window.innerHeight,
-        1,
-        20000
+        0.1,
+        1000
       );
-      camera.position.set(30, 30, 100);
-
+      // camera.position.set(30, 30, 100);
+      // camera.position.z = 50;
+      // camera.position.y = 10;
+      // camera.lookAt(new THREE.Vector3(0, -10, 0));
       //
 
+      camera.position.set(20, 50, 0);
+      camera.up.set(0, -1, 0);
+      camera.rotation.x = Math.PI / 2;
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+      // camera.rotation.x = Math.PI;
       sun = new THREE.Vector3();
 
       // Water
@@ -64,6 +71,7 @@ class Scene extends Component {
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
           }
         ),
+
         sunDirection: new THREE.Vector3(),
         sunColor: 0xffffff,
         waterColor: 0x001e0f,
@@ -74,52 +82,60 @@ class Scene extends Component {
       water.rotation.x = -Math.PI / 2;
 
       scene.add(water);
+      var skyboxGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
+      var skyboxMaterial = new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load(underwater),
+        side: THREE.BackSide,
+      });
+      var skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
+      scene.add(skybox);
+      // const sky = new Sky();
+      // sky.scale.setScalar(10000);
+      // scene.add(sky);
 
-      // Skybox
+      // const skyUniforms = sky.material.uniforms;
 
-      const sky = new Sky();
-      sky.scale.setScalar(10000);
-      scene.add(sky);
+      // skyUniforms["turbidity"].value = 10;
+      // skyUniforms["rayleigh"].value = 2;
+      // skyUniforms["mieCoefficient"].value = 0.005;
+      // skyUniforms["mieDirectionalG"].value = 0.8;
 
-      const skyUniforms = sky.material.uniforms;
+      // var light = new THREE.PointLight(0xffffff, 0.8);
+      // light.position.set(0, 100, 0);
+      // scene.add(light);
+      // const parameters = {
+      //   elevation: 2,
+      //   azimuth: 180,
+      // };
 
-      skyUniforms["turbidity"].value = 10;
-      skyUniforms["rayleigh"].value = 2;
-      skyUniforms["mieCoefficient"].value = 0.005;
-      skyUniforms["mieDirectionalG"].value = 0.8;
+      // const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      // let renderTarget;
 
-      const parameters = {
-        elevation: 2,
-        azimuth: 180,
-      };
+      // function updateSun() {
+      //   const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
+      //   const theta = THREE.MathUtils.degToRad(parameters.azimuth);
 
-      const pmremGenerator = new THREE.PMREMGenerator(renderer);
-      let renderTarget;
+      //   sun.setFromSphericalCoords(1, phi, theta);
 
-      function updateSun() {
-        const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
-        const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+      //   sky.material.uniforms["sunPosition"].value.copy(sun);
+      //   water.material.uniforms["sunDirection"].value.copy(sun).normalize();
 
-        sun.setFromSphericalCoords(1, phi, theta);
+      //   if (renderTarget !== undefined) renderTarget.dispose();
 
-        sky.material.uniforms["sunPosition"].value.copy(sun);
-        water.material.uniforms["sunDirection"].value.copy(sun).normalize();
+      //   renderTarget = pmremGenerator.fromScene(sky);
 
-        if (renderTarget !== undefined) renderTarget.dispose();
+      //   scene.environment = renderTarget.texture;
+      // }
 
-        renderTarget = pmremGenerator.fromScene(sky);
-
-        scene.environment = renderTarget.texture;
-      }
-
-      updateSun();
+      // updateSun();
       //
 
       controls = new OrbitControls(camera, renderer.domElement);
       controls.maxPolarAngle = Math.PI * 0.495;
-      controls.target.set(0, 10, 0);
-      controls.minDistance = 40.0;
-      controls.maxDistance = 200.0;
+      controls.target.set(0, 20, 0);
+      // controls.minDistance = 40.0;
+      // controls.maxDistance = 200.0;
+      // controls.enableRotate = false;
       controls.update();
 
       window.addEventListener("resize", onWindowResize);
