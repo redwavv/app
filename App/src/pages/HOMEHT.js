@@ -62,6 +62,11 @@ function HOMEHT() {
             A Metaverse Experience
           </p>
         </div>
+        <div>
+          <button className="enter-button" type="button">
+            Enter
+          </button>
+        </div>
       </div>
     </>
   );
